@@ -9,7 +9,6 @@ import { getConfig } from '../../config';
 const highlight = require('cli-highlight').highlight;
 
 const basename = path.basename(module.filename);
-
 function models() {
   const database = {} as any;
 
@@ -30,6 +29,9 @@ function models() {
                 }),
               )
           : false,
+      dialectOptions: {
+        ssl: getConfig().APP_ENVIRONMENT === 'production',
+      }
     },
   );
 

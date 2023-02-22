@@ -4,6 +4,7 @@ class Roles {
     return {
       admin: 'admin',
       custom: 'custom',
+      superadmin: 'superadmin',
     };
   }
 }

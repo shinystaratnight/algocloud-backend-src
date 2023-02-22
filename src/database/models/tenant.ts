@@ -58,6 +58,17 @@ export default function (sequelize, DataTypes) {
       planUserId: {
         type: DataTypes.UUID,
       },
+      planSubscriptionId: {
+        type: DataTypes.STRING(255),
+        validate: {
+          len: [0, 255],
+        }
+      },
+      createdBySuperadmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      }
     },
     {
       indexes: [

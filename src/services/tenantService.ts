@@ -530,4 +530,34 @@ export default class TenantService {
 
     return count > 0;
   }
+
+  async updatePlanSubscriptionId(
+    planStripeCustomerId,
+    planSubscriptionId,
+  ) {
+    const transaction = await SequelizeRepository.createTransaction(
+      this.options.database,
+    );
+
+    try {
+      await TenantRepository.updatePlanSubscriptionId(
+        planStripeCustomerId,
+        planSubscriptionId,
+        {
+          ...this.options,
+          transaction,
+          bypassPermissionValidation: true,
+        },
+      );
+
+      await SequelizeRepository.commitTransaction(
+        transaction,
+      );
+    } catch (error) {
+      await SequelizeRepository.rollbackTransaction(
+        transaction,
+      );
+      throw error;
+    }
+  }
 }

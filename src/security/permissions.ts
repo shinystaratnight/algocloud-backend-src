@@ -239,7 +239,68 @@ class Permissions {
         id: 'orderAutocomplete',
         allowedRoles: [roles.admin, roles.custom],
         allowedPlans: [plans.free, plans.growth, plans.enterprise],
-      },      
+      },
+      algorandRead: {
+        id: 'algorandRead',
+        allowedRoles: [roles.admin, roles.custom],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      algorandFavoriteToggle: {
+        id: 'algorandFavoriteToggle',
+        allowedRoles: [roles.admin, roles.custom],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      algorandSetShowcase: {
+        id: 'algorandSetShowcase',
+        allowedRoles: [roles.admin, roles.custom],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      userReadSuperadmin: {
+        id: 'userReadSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      userUpdateSuperadmin: {
+        id: 'userUpdateSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+
+      tenantReadSuperadmin: {
+        id: 'tenantReadSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      tenantCreateSuperadmin: {
+        id: 'tenantCreateSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      tenantDestroySuperadmin: {
+        id: 'tenantDestroySuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      analyticsFetchSuperadmin: {
+        id: 'analyticsFetchSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      subscriptionCancelSuperadmin: {
+        id: 'subscriptionCancelSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      settingsReadSuperadmin: {
+        id: 'settingsReadSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
+      settingsEditSuperadmin: {
+        id: 'settingsEditSuperadmin',
+        allowedRoles: [roles.superadmin],
+        allowedPlans: [],
+      },
     };
   }
 

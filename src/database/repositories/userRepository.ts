@@ -31,6 +31,7 @@ export default class UserRepository {
         lastName: data.lastName || null,
         phoneNumber: data.phoneNumber || null,
         importHash: data.importHash || null,
+        active: data.active || false,
         createdById: currentUser.id,
         updatedById: currentUser.id,
       },

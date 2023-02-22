@@ -1,17 +1,71 @@
 import assert from 'assert';
 import { getConfig } from '../config';
-import sendgridMail from '@sendgrid/mail';
+import { NodeMailgun } from 'ts-mailgun'
+import { MailgunTemplate } from 'ts-mailgun/dist/mailgun-template';
 
-if (getConfig().SENDGRID_KEY) {
-  sendgridMail.setApiKey(getConfig().SENDGRID_KEY);
-}
+const mailer = new NodeMailgun();
+
+mailer.apiKey = getConfig().MAILGUN_API_KEY;
+mailer.domain = getConfig().MAILGUN_DOMAIN;
+mailer.fromEmail = getConfig().MAILGUN_EMAIL_FROM;
+mailer.fromTitle = getConfig().MAILGUN_TITLE_FROM;
+mailer.unsubscribeLink = false;
+
+mailer.templates[getConfig().MAILGUN_TEMPLATE_EMAIL_ADDRESS_VERIFICATION] = new MailgunTemplate();
+mailer.templates[getConfig().MAILGUN_TEMPLATE_EMAIL_ADDRESS_VERIFICATION].subject = 'Verify your email for ScaffoldHub';
+mailer.templates[getConfig().MAILGUN_TEMPLATE_EMAIL_ADDRESS_VERIFICATION].body = '\
+    <p>Hello,</p> \
+    <p>Follow this link to verify your email address.</p> \
+    <p><a href="{{link}}">{{link}}</a></p> \
+    <p> \
+      If you didn’t ask to verify this address, you can ignore \
+      this email. \
+    </p>\
+    <p>Thanks,</p> \
+    <p>Your ScaffoldHub team</p>';
+
+mailer.templates[getConfig().MAILGUN_TEMPLATE_INVITATION] = new MailgunTemplate();
+mailer.templates[getConfig().MAILGUN_TEMPLATE_INVITATION].subject = 'You\'ve been invited to {{tenantName}} at ScaffoldHub';
+mailer.templates[getConfig().MAILGUN_TEMPLATE_INVITATION].body = '\
+    <p>Hello,</p> \
+    <p>You\'ve been invited to {{tenantName}}.</p> \
+    <p>Follow this link to register.</p> \
+    <p><a href="{{link}}">{{link}}</a></p> \
+    <p>Thanks,</p> \
+    <p>Your ScaffoldHub team</p>';
+
+mailer.templates[getConfig().MAILGUN_TEMPLATE_PASSWORD_RESET] = new MailgunTemplate();
+mailer.templates[getConfig().MAILGUN_TEMPLATE_PASSWORD_RESET].subject = 'Reset your password for ScaffoldHub';
+mailer.templates[getConfig().MAILGUN_TEMPLATE_PASSWORD_RESET].body = '\
+    <p>Hello,</p> \
+    <p> \
+      Follow this link to reset your ScaffoldHub password for \
+      your account. \
+    </p> \
+    <p><a href="{{link}}">{{link}}</a></p> \
+    <p> \
+      If you didn\’t ask to reset your password, you can ignore \
+      this email. \
+    </p> \
+    <p>Thanks,</p> \
+    <p>Your ScaffoldHub team</p>';
+
+mailer.templates[getConfig().MAILGUN_TEMPLATE_USER_UPDATED] = new MailgunTemplate();
+mailer.templates[getConfig().MAILGUN_TEMPLATE_USER_UPDATED].subject = 'Your account has been {{done}} by ScaffoldHub';
+mailer.templates[getConfig().MAILGUN_TEMPLATE_USER_UPDATED].body = '\
+    <p>Hello,</p> \
+    <p>Your account has been {{done}} by ScaffoldHub.</p>\
+    <p>Thanks,</p> \
+    <p>Your ScaffoldHub team</p>';
+
+mailer.init();
 
 export default class EmailSender {
-  templateId: string;
+  template: string;
   variables: any;
 
-  constructor(templateId, variables) {
-    this.templateId = templateId;
+  constructor(template, variables) {
+    this.template = template;
     this.variables = variables;
   }
 
@@ -21,11 +75,10 @@ export default class EmailSender {
     }
 
     return {
-      EMAIL_ADDRESS_VERIFICATION: getConfig()
-        .SENDGRID_TEMPLATE_EMAIL_ADDRESS_VERIFICATION,
-      INVITATION: getConfig().SENDGRID_TEMPLATE_INVITATION,
-      PASSWORD_RESET: getConfig()
-        .SENDGRID_TEMPLATE_PASSWORD_RESET,
+      EMAIL_ADDRESS_VERIFICATION: getConfig().MAILGUN_TEMPLATE_EMAIL_ADDRESS_VERIFICATION,
+      INVITATION: getConfig().MAILGUN_TEMPLATE_INVITATION,
+      PASSWORD_RESET: getConfig().MAILGUN_TEMPLATE_PASSWORD_RESET,
+      USER_UPDATED: getConfig().MAILGUN_TEMPLATE_USER_UPDATED,
     };
   }
 
@@ -36,23 +89,13 @@ export default class EmailSender {
     }
 
     assert(recipient, 'to is required');
-    assert(
-      getConfig().SENDGRID_EMAIL_FROM,
-      'SENDGRID_EMAIL_FROM is required',
-    );
-    assert(this.templateId, 'templateId is required');
-
-    const msg = {
-      to: recipient,
-      from: getConfig().SENDGRID_EMAIL_FROM,
-      templateId: this.templateId,
-      dynamicTemplateData: this.variables,
-    };
-
+    
     try {
-      return await sendgridMail.send(msg);
+      let mgTemplate = mailer.getTemplate(this.template);
+      if (mgTemplate && mgTemplate instanceof MailgunTemplate)
+        return await mailer.sendFromTemplate(recipient, mgTemplate, this.variables);
     } catch (error) {
-      console.error('Error sending SendGrid email.');
+      console.error('Error sending MailGun email.');
       console.error(error);
       throw error;
     }
@@ -60,8 +103,8 @@ export default class EmailSender {
 
   static get isConfigured() {
     return Boolean(
-      getConfig().SENDGRID_EMAIL_FROM &&
-        getConfig().SENDGRID_KEY,
+      getConfig().MAILGUN_API_KEY &&
+        getConfig().MAILGUN_DOMAIN,
     );
   }
 }

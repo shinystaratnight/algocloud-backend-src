@@ -234,6 +234,40 @@ class TenantRepository {
     return this.findById(record.id, options);
   }
 
+  static async updatePlanSubscriptionId(
+    planStripeCustomerId,
+    planSubscriptionId,
+    options: IRepositoryOptions,
+  ) {
+    const transaction = SequelizeRepository.getTransaction(
+      options,
+    );
+
+    let record = await options.database.tenant.findOne({
+      where: {
+        planStripeCustomerId,
+      },
+      transaction,
+    });
+
+    const data = {
+      planSubscriptionId,
+    };
+
+    record = await record.update(data, {
+      transaction,
+    });
+
+    await this._createAuditLog(
+      AuditLogRepository.UPDATE,
+      record,
+      data,
+      options,
+    );
+
+    return this.findById(record.id, options);
+  }
+
   static async destroy(id, options: IRepositoryOptions) {
     const transaction = SequelizeRepository.getTransaction(
       options,

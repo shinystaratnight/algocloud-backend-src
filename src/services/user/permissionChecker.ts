@@ -1,6 +1,7 @@
 import assert from 'assert';
 import Error403 from '../../errors/Error403';
 import Plans from '../../security/plans';
+import Roles from '../../security/roles';
 import Permissions from '../../security/permissions';
 import EmailSender from '../emailSender';
 
@@ -82,6 +83,11 @@ export default class PermissionChecker {
   hasPlanPermission(permission) {
     assert(permission, 'permission is required');
 
+    // Skip tenant plan checking if the current user is a super administrator.
+    if (this.currentUserRolesIds.includes(Roles.values.superadmin)) {
+      return true;
+    }
+
     return permission.allowedPlans.includes(
       this.currentTenantPlan,
     );
@@ -101,7 +107,16 @@ export default class PermissionChecker {
    * Returns the Current User Roles.
    */
   get currentUserRolesIds() {
-    if (!this.currentUser || !this.currentUser.tenants) {
+    if (!this.currentUser) {
+      return [];
+    }
+
+    // If current user is superadmin, skip to check tenant plan validations.
+    if (this.currentUser.superadmin) {
+      return [Roles.values.superadmin];
+    }
+
+    if (!this.currentUser.tenants) {
       return [];
     }
 

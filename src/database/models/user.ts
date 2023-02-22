@@ -102,6 +102,16 @@ export default function (sequelize, DataTypes) {
           len: [0, 255],
         },
       },
+      active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      superadmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      }
     },
     {
       indexes: [
@@ -128,6 +138,10 @@ export default function (sequelize, DataTypes) {
   user.associate = (models) => {
     models.user.hasMany(models.tenantUser, {
       as: 'tenants',
+    });
+
+    models.user.hasMany(models.algoFavorite, {
+      as: 'algoFavorites',
     });
 
     models.user.hasMany(models.file, {
